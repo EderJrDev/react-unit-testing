@@ -1,11 +1,10 @@
-import { getByPlaceholderText, render } from "@testing-library/react";
+import {
+  render,
+  waitFor,
+  waitForElementToBeRemoved,
+} from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import App from "./App";
-
-// test("sum", () => {
-//   const { getByText } = render(<App />);
-//   expect(getByText("Hello World")).toBeInTheDocument();
-// });
 
 describe("App Component", () => {
   it("should render list items ", () => {
@@ -16,19 +15,29 @@ describe("App Component", () => {
     expect(getByText("Mayk")).toBeInTheDocument();
   });
 
-  it("should be able to add new item to the list", () => {
-    const { getByText, debug, getByPlaceholderText } = render(<App />);
+  it("should be able to add new item to the list", async () => {
+    const { getByText, getByPlaceholderText } = render(<App />);
 
     const inputElement = getByPlaceholderText("Novo item");
     const addButton = getByText("Adicionar");
 
-    debug();
-
     userEvent.type(inputElement, "Novo");
     userEvent.click(addButton);
 
-    debug();
+    await waitFor(() => {
+      expect(getByText("Novo")).toBeInTheDocument();
+    });
+  });
 
-    expect(getByText("Novo")).toBeInTheDocument();
+  it("should be able to add remove item to the list", async () => {
+    const { getAllByText, queryByText } = render(<App />);
+
+    const removeButtons = getAllByText("Remover");
+
+    userEvent.click(removeButtons[0]);
+
+    await waitForElementToBeRemoved(() => {
+      expect(queryByText("Diego")).not.toBeInTheDocument();
+    });
   });
 });
